@@ -19,6 +19,7 @@ pipeline {
                 sh 'ls -la'
             }
         }
+    }
     //     stage('Checkout') {
     //         steps {
     //             // چک کردن کد از مخزن گیت لوکال
