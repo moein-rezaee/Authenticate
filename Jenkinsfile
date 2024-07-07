@@ -73,6 +73,27 @@ pipeline {
                 }
             }
         }
+        stage('Remove Old Environment') {
+            steps {
+                script {
+                    if (env.DEPLOY_ENV == "blue") {
+                        DEPLOY_ENV = "green"
+                        DEPLOY_PORT = "5281"
+                    
+                        echo "Remove Environment: blue"
+                        sh "docker rm -f blue-${CONTAINER_NAME} || true"
+                        sh "docker rmi -f blue-${CONTAINER_NAME} || true"
+                    } else {
+                        DEPLOY_ENV = "blue"
+                        DEPLOY_PORT = "5280"
+
+                        echo "Remove Environment: green"
+                        sh "docker rm -f green-${CONTAINER_NAME} || true"
+                        sh "docker rmi -f green-${CONTAINER_NAME} || true"
+                    }
+                }
+            }
+        }
     }
     post {
         always {
