@@ -19,7 +19,7 @@ builder.Services.AddSingleton<IJWTProvider, JWTProvider>();
 string? defName = builder.Configuration["Db:Name"];
 string? defHost = builder.Configuration["Db:Host"];
 string? defPass = builder.Configuration["Db:Pass"];
-string? dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? defHost;
+string? dbHost = Environment.GetEnvironmentVariable("DEPLOY_ENV") ?? defHost;
 string? dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? defName;
 string? dbPass = Environment.GetEnvironmentVariable("DB_SA_PASSWORD") ?? defPass;
 string connectionString = $"Server={dbHost}; Persist Security Info=False; TrustServerCertificate=true; User ID=sa;Password={dbPass};Initial Catalog={dbName};";
