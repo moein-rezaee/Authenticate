@@ -10,7 +10,7 @@ pipeline {
         PROJECT_DIR = './Authenticate'
         ACTIVE_BRANCH = 'main'
         DEV_MODE = 'ASPNETCORE_ENVIRONMENT=Development'
-        DEPLOY_ENV = "blue"
+        DEPLOY_ENV = "green"
         DEPLOY_PORT = "5280"
     }
     stages {
