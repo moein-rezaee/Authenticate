@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE_NAME = 'auth-dev:0.0'
         CONTAINER_NAME = 'auth-dev'
-        APP_PORT = '5254'
+        APP_PORT = '5280'
         GIT_REPO = 'https://github.com/moein-rezaee/Authenticate.git'
         LOCAL_GIT_REPO = '/home/moein/Desktop/Jenkins/Authenticate'
         PROJECT_DIR = './Authenticate'
