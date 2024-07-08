@@ -2,14 +2,16 @@
 pipeline {
     agent any
     environment {
-        DOCKER_IMAGE_NAME = 'auth-dev:0.0'
-        CONTAINER_NAME = 'auth-dev'
+        DOCKER_IMAGE_NAME = 'auth:0.0'
+        CONTAINER_NAME = 'auth'
         APP_PORT = '5280'
         GIT_REPO = 'https://github.com/moein-rezaee/Authenticate.git'
         LOCAL_GIT_REPO = '/home/moein/Desktop/Jenkins/Authenticate'
         PROJECT_DIR = './Authenticate'
         ACTIVE_BRANCH = 'develop'
         DEV_MODE = 'ASPNETCORE_ENVIRONMENT=Development'
+        DEPLOY_ENV = "blue"
+        DEPLOY_PORT = "5280"
     }
     stages {
         stage('Show Current Directory') {
@@ -41,8 +43,17 @@ pipeline {
         stage('Remove Old Image') {
             steps {
                 script {
-                    sh "docker rm -f ${CONTAINER_NAME} || true"
-                    sh "docker rmi -f ${DOCKER_IMAGE_NAME} || true"
+                    if (env.DEPLOY_ENV == "blue") {
+                        DEPLOY_ENV = "green"
+                        DEPLOY_PORT = "5281"
+                    } else {
+                        DEPLOY_ENV = "blue"
+                        DEPLOY_PORT = "5280"
+                    }
+                    echo "Active Environment is: ${env.DEPLOY_ENV}"
+                    echo "Deploying to ${DEPLOY_ENV} environment..."
+                    sh "docker rm -f ${DEPLOY_ENV}-${CONTAINER_NAME} || true"
+                    sh "docker rmi -f ${DEPLOY_ENV}-${CONTAINER_NAME} || true"
                 }
             }
         }
@@ -50,7 +61,7 @@ pipeline {
             steps {
                 dir("${PROJECT_DIR}") {
                     script {
-                        sh "docker build -t ${DOCKER_IMAGE_NAME} ."
+                        sh "docker build -t ${DEPLOY_ENV}-${DOCKER_IMAGE_NAME} ."
                     }
                 }
             }
@@ -58,9 +69,35 @@ pipeline {
         stage('Run New Container') {
             steps {
                 script {
-                    sh "docker run --name ${CONTAINER_NAME} -e ${DEV_MODE} -p ${APP_PORT}:${APP_PORT} -dit --rm ${DOCKER_IMAGE_NAME}"
+                    sh "docker run --name ${DEPLOY_ENV}-${CONTAINER_NAME} -e ${DEV_MODE} -p ${DEPLOY_PORT}:${APP_PORT} -dit --rm ${DEPLOY_ENV}-${DOCKER_IMAGE_NAME}"
                 }
             }
+        }
+        stage('Remove Old Environment') {
+            steps {
+                script {
+                    if (env.DEPLOY_ENV == "blue") {
+                        DEPLOY_ENV = "green"
+                        DEPLOY_PORT = "5281"
+                    
+                        echo "Remove Environment: blue"
+                        sh "docker rm -f blue-${CONTAINER_NAME} || true"
+                        sh "docker rmi -f blue-${CONTAINER_NAME} || true"
+                    } else {
+                        DEPLOY_ENV = "blue"
+                        DEPLOY_PORT = "5280"
+
+                        echo "Remove Environment: green"
+                        sh "docker rm -f green-${CONTAINER_NAME} || true"
+                        sh "docker rmi -f green-${CONTAINER_NAME} || true"
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            sh "docker logs ${DEPLOY_ENV}-${CONTAINER_NAME} || true"
         }
     }
 };
